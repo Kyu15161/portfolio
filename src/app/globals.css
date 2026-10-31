@@ -1,0 +1,389 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-serif: var(--font-editorial), Georgia, Cambria, "Times New Roman", serif;
+  --font-sans: var(--font-sans-ui), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono-tech), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+:root {
+  color-scheme: dark;
+  --background: #110e0c;
+  --surface: #181411;
+  --surface-elevated: #221c18;
+  --foreground: #f4ede2;
+  --muted: #c6baa9;
+  --subtle: #a39686;
+  --border-subtle: #312923;
+  --border-strong: #4d4036;
+  --accent: #e26947;
+  --accent-ink: #110e0c;
+  --ochre: #d89b52;
+  --teal: #3b7a8c;
+  --teal-deep: #2d648e;
+  --ambient-color: #e26947;
+  --in-oklab: ;
+  --in-oklch: ;
+}
+
+@supports (background: linear-gradient(in oklab, white, black)) {
+  :root {
+    --in-oklab: in oklab;
+    --in-oklch: in oklch;
+  }
+}
+
+@layer base {
+  html {
+    background-color: var(--background);
+    overflow-x: clip;
+    @media (prefers-reduced-motion: no-preference) {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    overflow-x: clip;
+    cursor: default;
+  }
+}
+
+/* Fixed darkroom glassmorphism for navbar and modal chrome only */
+.darkroom-glass {
+  background-color: rgba(20, 16, 14, 0.86);
+  background-color: color-mix(in oklab, var(--ambient-color) 9%, rgba(19, 15, 13, 0.88));
+  backdrop-filter: blur(20px) saturate(145%);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  box-shadow:
+    inset 0 1px 0 rgba(244, 237, 226, 0.08),
+    0 14px 36px -18px rgba(5, 4, 3, 0.78);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .darkroom-glass {
+    background-color: #16120f;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* Machined Double-Bezel (Doppelrand) enclosures */
+.double-bezel-shell {
+  background-color: rgba(244, 237, 226, 0.03);
+  background-color: color-mix(in oklab, var(--ambient-color) 8%, rgba(244, 237, 226, 0.03));
+  border: 1px solid rgba(244, 237, 226, 0.09);
+  border-color: color-mix(in oklab, var(--ambient-color) 22%, rgba(244, 237, 226, 0.09));
+}
+
+.double-bezel-core {
+  background-color: #181411;
+  background-color: color-mix(in oklab, var(--ambient-color) 6%, #181411);
+  box-shadow: inset 0 1px 1px rgba(244, 237, 226, 0.09);
+}
+
+/* Chromatic print mat reacting to each photograph's dominant pigment */
+.print-mat {
+  --card-tint: var(--ambient-color);
+  background-color: #181411;
+  background-color: color-mix(in oklab, var(--card-tint) 8%, #181411);
+  border: 1px solid #352c25;
+  border-color: color-mix(in oklab, var(--card-tint) 24%, #352c25);
+  box-shadow:
+    0 24px 52px -24px rgba(5, 4, 3, 0.88),
+    inset 0 1px 0 rgba(244, 237, 226, 0.07);
+  transition:
+    border-color 420ms cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 420ms cubic-bezier(0.32, 0.72, 0, 1),
+    background-color 420ms cubic-bezier(0.32, 0.72, 0, 1);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: border-color 180ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+}
+
+.group:hover .print-mat,
+.group:focus-visible .print-mat {
+  border-color: #5c493d;
+  border-color: color-mix(in oklab, var(--card-tint) 56%, #4a3c32);
+  background-color: color-mix(in oklab, var(--card-tint) 14%, #1d1714);
+  box-shadow:
+    0 30px 64px -22px color-mix(in oklab, var(--card-tint) 38%, rgba(5, 4, 3, 0.92)),
+    0 0 42px -18px color-mix(in oklab, var(--card-tint) 32%, transparent),
+    inset 0 1px 0 rgba(244, 237, 226, 0.12);
+}
+
+/* 3D Optical Plate Tilt & Specular Tungsten Glare (CSS var driven, zero React re-renders) */
+.tilt-plate {
+  --rx: 0deg;
+  --ry: 0deg;
+  --tilt-scale: 1;
+  --glare-x: 50%;
+  --glare-y: 50%;
+  --glare-opacity: 0;
+  transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry))
+    scale3d(var(--tilt-scale), var(--tilt-scale), var(--tilt-scale));
+  transform-style: preserve-3d;
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+
+  @media (prefers-reduced-motion: reduce) {
+    transform: none !important;
+    transition: none;
+    will-change: auto;
+  }
+
+  @media (pointer: coarse) {
+    transform: none !important;
+    transition: none;
+    will-change: auto;
+  }
+}
+
+.tilt-glare {
+  background: radial-gradient(
+    circle 360px at var(--glare-x, 50%) var(--glare-y, 50%) var(--in-oklab),
+    rgba(255, 246, 232, 0.28),
+    color-mix(in oklab, var(--card-tint, #e26947) 22%, rgba(216, 155, 82, 0.14)) 40%,
+    transparent 74%
+  );
+  opacity: var(--glare-opacity, 0);
+  mix-blend-mode: soft-light;
+  transition: opacity 320ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  @media (prefers-reduced-motion: reduce) {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    display: none;
+  }
+}
+
+/* Hero Ken Burns slow analog drift (case-by-case reduced-motion handling) */
+@keyframes hero-ken-burns-drift {
+  0% {
+    transform: scale3d(1.02, 1.02, 1) translate3d(0%, 0%, 0);
+  }
+  100% {
+    transform: scale3d(1.085, 1.085, 1) translate3d(-1.4%, -0.9%, 0);
+  }
+}
+
+.hero-ken-burns {
+  transform: scale3d(1.01, 1.01, 1);
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: hero-ken-burns-drift 24s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
+    will-change: transform;
+  }
+}
+
+/* Warm Kodak Portra halation + Nordic dusk teal counter-wash for hero stage */
+.hero-halation {
+  --hero-tint: var(--ambient-color);
+  background:
+    radial-gradient(
+      ellipse 72% 58% at 18% 26% var(--in-oklab),
+      color-mix(in oklab, var(--hero-tint) 36%, rgba(226, 105, 71, 0.28)),
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 68% 62% at 86% 78% var(--in-oklab),
+      rgba(59, 122, 140, 0.3),
+      transparent 66%
+    ),
+    linear-gradient(
+      180deg var(--in-oklab),
+      rgba(14, 11, 9, 0.72) 0%,
+      rgba(17, 14, 12, 0.34) 38%,
+      rgba(17, 14, 12, 0.74) 76%,
+      rgba(17, 14, 12, 0.96) 100%
+    );
+}
+
+/* Chromatic section hairline divider */
+.chromatic-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg var(--in-oklab),
+    transparent 0%,
+    color-mix(in oklab, var(--ambient-color) 58%, #4d4036) 24%,
+    color-mix(in oklab, var(--ochre) 52%, var(--teal)) 68%,
+    transparent 100%
+  );
+}
+
+/* Dual-tone terracotta + dusk teal atmospheric wash for Commissions chapter */
+.contact-atmosphere {
+  background:
+    radial-gradient(
+      ellipse 68% 60% at 16% 24% var(--in-oklab),
+      color-mix(in oklab, var(--accent) 22%, rgba(216, 155, 82, 0.14)),
+      transparent 66%
+    ),
+    radial-gradient(
+      ellipse 66% 62% at 86% 78% var(--in-oklab),
+      rgba(59, 122, 140, 0.24),
+      transparent 68%
+    ),
+    linear-gradient(180deg, rgba(22, 18, 15, 0.94), rgba(17, 14, 12, 0.98));
+}
+
+/* Lightbox ambient room tint */
+.lightbox-backdrop {
+  --lightbox-tint: var(--ambient-color);
+  background-color: rgba(13, 10, 9, 0.96);
+  background-image: radial-gradient(
+    circle at 50% 42% var(--in-oklab),
+    color-mix(in oklab, var(--lightbox-tint) 26%, rgba(26, 20, 17, 0.95)),
+    rgba(11, 9, 8, 0.98) 76%
+  );
+}
+
+/* Native CSS scroll-driven progress hairline on compositor thread */
+@keyframes scroll-progress-scale {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.scroll-progress-bar {
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(
+    to right var(--in-oklab),
+    var(--accent),
+    color-mix(in oklab, var(--ambient-color) 70%, var(--ochre)),
+    var(--teal)
+  );
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports ((animation-timeline: scroll())) {
+      animation: scroll-progress-scale auto linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+
+/* Progressive-enhancement CSS ViewTimeline halation bloom for chapters */
+@keyframes chapter-halation-bloom {
+  from {
+    opacity: 0.35;
+    transform: scale3d(0.96, 0.96, 1);
+  }
+  to {
+    opacity: 1;
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
+    .scrolly-chapter-glow {
+      view-timeline: --chapter-bloom block;
+      animation: chapter-halation-bloom auto linear both;
+      animation-timeline: --chapter-bloom;
+      animation-range: entry 10% cover 42%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrolly-chapter-glow {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    translate: 0 0 !important;
+  }
+}
+
+/* Scoped View Transition morphing for active category filter switches */
+.gallery-vt-active [data-vt-plate] {
+  view-transition-name: var(--vt-plate-name, none);
+}
+
+::view-transition-group(*) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Mandatory reduced motion safety for View Transitions */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Preserve exact pigment color in Forced Colors Mode only for actual hex swatches */
+.color-swatch-chip {
+  forced-color-adjust: none;
+}
+
+@media (forced-colors: active) {
+  .print-mat {
+    border: 1px solid CanvasText;
+  }
+}
+
+/* Hide default cursor on devices that support hover when custom cursor is active (except form controls) */
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  body.custom-cursor-active {
+    cursor: none;
+  }
+  body.custom-cursor-active a,
+  body.custom-cursor-active button,
+  body.custom-cursor-active [role="button"] {
+    cursor: none;
+  }
+
+  body.custom-cursor-active input,
+  body.custom-cursor-active select,
+  body.custom-cursor-active textarea,
+  body.custom-cursor-active [contenteditable="true"] {
+    cursor: auto !important;
+  }
+
+  body.custom-cursor-active input[type="text"],
+  body.custom-cursor-active input[type="password"],
+  body.custom-cursor-active input[type="email"],
+  body.custom-cursor-active input[type="search"],
+  body.custom-cursor-active input[type="number"],
+  body.custom-cursor-active textarea {
+    cursor: text !important;
+  }
+
+  body.custom-cursor-active select,
+  body.custom-cursor-active input[type="file"],
+  body.custom-cursor-active input[type="checkbox"],
+  body.custom-cursor-active input[type="radio"] {
+    cursor: pointer !important;
+  }
+}
+
+/* Warm archival scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #110e0c;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #362d26;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #524338;
+}
